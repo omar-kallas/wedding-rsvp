@@ -257,6 +257,11 @@
     transition:opacity .4s;
   }
   #muteBtn:active{transform:scale(0.94)}
+  #muteBtn.pulse{animation:sealPulse 2.2s ease-in-out infinite}
+  @keyframes sealPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(155,138,196,0)}
+    50%{box-shadow:0 0 0 9px rgba(155,138,196,0.25)}
+  }
 
   @media (prefers-reduced-motion: reduce){
     .float{animation:none}
@@ -442,7 +447,7 @@
   const icoOn = document.getElementById('icoOn');
   const icoOff = document.getElementById('icoOff');
   let audioOk = false;
-  bgm.addEventListener('canplaythrough', ()=>{ audioOk = true; muteBtn.hidden = false; }, {once:true});
+  bgm.addEventListener('canplaythrough', ()=>{ audioOk = true; muteBtn.hidden = false; muteBtn.classList.add('pulse'); }, {once:true});
   bgm.addEventListener('error', ()=>{ muteBtn.hidden = true; }); // song.mp3 not uploaded yet
 
   function fadeIn(){
@@ -453,13 +458,20 @@
       if(bgm.volume >= target) clearInterval(iv);
     }, 50);
   }
-  function startMusic(){
-    if(!audioOk || !bgm.paused) return;
-    bgm.play().then(fadeIn).catch(()=>{});
-  }
-  ['touchstart','scroll','click','keydown'].forEach(ev=>
-    window.addEventListener(ev, startMusic, {once:true, passive:true})
-  );
+  const startEvents = ['touchend','pointerup','pointerdown','touchstart','click','keydown','scroll'];
+let started = false;
+function startMusic(){
+  if(started || !audioOk || !bgm.paused) return;
+  bgm.play().then(()=>{
+    started = true;
+    fadeIn();
+    muteBtn.classList.remove('pulse');
+    startEvents.forEach(ev=>window.removeEventListener(ev, startMusic));
+  }).catch(()=>{ /* gesture not trusted yet — keep listening */ });
+}
+startEvents.forEach(ev=>
+  window.addEventListener(ev, startMusic, {passive:true})
+);
 
   muteBtn.addEventListener('click', (e)=>{
     e.stopPropagation();
