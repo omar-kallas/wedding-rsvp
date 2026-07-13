@@ -457,8 +457,8 @@
   const muteBtn = document.getElementById('muteBtn');
   const icoOn = document.getElementById('icoOn');
   const icoOff = document.getElementById('icoOff');
-  let audioOk = false;
-  bgm.addEventListener('canplaythrough', ()=>{ audioOk = true; muteBtn.hidden = false; muteBtn.classList.add('pulse'); }, {once:true});
+  bgm.addEventListener('canplaythrough', ()=>{ muteBtn.hidden = false; muteBtn.classList.add('pulse'); }, {once:true});
+  bgm.addEventListener('playing', ()=>{ muteBtn.hidden = false; muteBtn.classList.remove('pulse'); }, {once:true});
   bgm.addEventListener('error', ()=>{ muteBtn.hidden = true; }); // song.mp3 not uploaded yet
 
   function fadeIn(){
@@ -472,10 +472,10 @@
   const startEvents = ['touchend','pointerup','pointerdown','touchstart','click','keydown','scroll'];
 let started = false;
 function startMusic(){
-  if(started || !audioOk || !bgm.paused) return;
+    if(started || !bgm.paused) return;
   bgm.play().then(()=>{
     started = true;
-    fadeIn();
+    // fadeIn();
     muteBtn.classList.remove('pulse');
     startEvents.forEach(ev=>window.removeEventListener(ev, startMusic));
   }).catch(()=>{ /* gesture not trusted yet — keep listening */ });
