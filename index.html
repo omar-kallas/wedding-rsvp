@@ -159,6 +159,15 @@
     font-family:'Aref Ruqaa', serif;
     color:#5C4716;font-size:1.25rem;
     will-change:transform,opacity;
+    cursor:pointer;
+    transition:transform .7s ease, opacity .7s ease;
+    animation:sealPulse 2.2s ease-in-out infinite;
+  }
+  .seal.broken{
+    opacity:0;
+    transform:scale(1.6) rotate(28deg);
+    pointer-events:none;
+    animation:none;
   }
   .seal-mono{
     width:72%;height:72%;object-fit:contain;
@@ -316,7 +325,7 @@
       </div>
     </div>
     <div class="hint" id="hint">
-      اسحب للأسفل لفتح الدعوة
+      <span id="hintText">اضغط على الختم لفتح الدعوة</span>
       <span class="chev"></span>
     </div>
   </div>
@@ -390,24 +399,24 @@
   const hint  = document.getElementById('hint');
   const floater = document.getElementById('floater');
 
+  let sealBroken = false;
   const clamp = (v,a,b)=>Math.min(b,Math.max(a,v));
+
   // progress of sub-phase: 0 before a, 1 after b
   const phase = (p,a,b)=>clamp((p-a)/(b-a),0,1);
   const ease  = t=>t*t*(3-2*t); // smoothstep
 
   function apply(p){
-    // seal breaks first
-    const s = ease(phase(p, 0.03, 0.20));
-    seal.style.opacity = String(1 - s);
-    seal.style.transform = `scale(${1 + s*0.5}) rotate(${s*25}deg)`;
+    // envelope stays closed until the seal is tapped
+    if(!sealBroken) p = Math.min(p, 0.02);
 
     // flap opens
-    const f = ease(phase(p, 0.16, 0.46));
+    const f = ease(phase(p, 0.06, 0.40));
     flap.style.transform = `rotateX(${-180*f}deg)`;
     flap.style.zIndex = f > 0.5 ? '1' : '4';
 
     // card rises out
-    const r = ease(phase(p, 0.44, 0.78));
+    const r = ease(phase(p, 0.34, 0.72));
     card.style.transform = `translateY(${-120*r}%) scale(${1 + 0.08*r})`;
     card.style.zIndex = r > 0.15 ? '6' : '2';
 
@@ -421,6 +430,8 @@
   }
 
   if(reduced){
+    sealBroken = true;
+    seal.classList.add('broken');
     apply(1);
     inner.style.opacity = '1';
     flap.style.zIndex = '1';
@@ -472,6 +483,13 @@ function startMusic(){
 startEvents.forEach(ev=>
   window.addEventListener(ev, startMusic, {passive:true})
 );
+seal.addEventListener('click', ()=>{
+  if(sealBroken) return;
+  sealBroken = true;
+  seal.classList.add('broken');
+  document.getElementById('hintText').textContent = 'اسحب للأسفل';
+  startMusic();
+});
 
   muteBtn.addEventListener('click', (e)=>{
     e.stopPropagation();
