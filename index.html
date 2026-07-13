@@ -284,7 +284,7 @@
 <body>
 
 <!-- ======= الموسيقى: ضع ملف الأغنية باسم song.mp3 بجانب هذا الملف ======= -->
-<audio id="bgm" src="song.mp3" loop preload="auto"></audio>
+<audio id="bgm" src="song.mp3" loop preload="none"></audio>
 <button id="muteBtn" aria-label="كتم الصوت" hidden>
   <svg id="icoOn" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
   <svg id="icoOff" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="16" y1="9" x2="22" y2="15"/><line x1="22" y1="9" x2="16" y2="15"/></svg>
@@ -460,6 +460,8 @@
   bgm.addEventListener('canplaythrough', ()=>{ muteBtn.hidden = false; muteBtn.classList.add('pulse'); }, {once:true});
   bgm.addEventListener('playing', ()=>{ muteBtn.hidden = false; muteBtn.classList.remove('pulse'); }, {once:true});
   bgm.addEventListener('error', ()=>{ muteBtn.hidden = true; }); // song.mp3 not uploaded yet
+  // start fetching the song only after the page itself has loaded
+  window.addEventListener('load', ()=>{ bgm.preload = 'auto'; bgm.load(); });
 
   function fadeIn(){
     bgm.volume = 0;
