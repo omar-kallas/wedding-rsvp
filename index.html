@@ -454,7 +454,7 @@
 
   // ======= تمرير تلقائي بطيء بعد فتح الدعوة — يتوقف عند أي تمرير يدوي =======
   const AUTO_SCROLL_SPEED = 40;   // بكسل في الثانية — عدّل هذا الرقم للتحكم بالسرعة
-  const AUTO_SCROLL_DELAY = 2000; // مللي ثانية قبل بدء التمرير التلقائي
+  const AUTO_SCROLL_DELAY = 1000; // مللي ثانية قبل بدء التمرير التلقائي
   let autoScrollId = null;
   function stopAutoScroll(){
     if(autoScrollId !== null){ cancelAnimationFrame(autoScrollId); autoScrollId = null; }
