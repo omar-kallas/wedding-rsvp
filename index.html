@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>دعوة زفاف</title>
-<link rel="preload" as="image" href="assets/img/envelope.jpg">
-<link rel="preload" as="image" href="assets/img/seal.png">
-<link rel="preload" as="font" type="font/woff2" href="assets/fonts/gulzar-arabic.woff2" crossorigin>
+<link rel="preload" as="image" href="assets/img/envelope.jpg" fetchpriority="high">
+<link rel="preload" as="image" href="assets/img/seal.png" fetchpriority="high">
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/gulzar-arabic.woff2" crossorigin fetchpriority="high">
 <style>
 @font-face{
   font-family:'Amiri';
@@ -301,7 +301,7 @@
 
 <!-- ======= الغلاف ======= -->
 <header class="hero">
-  <img alt="دعوة زفاف" src="assets/img/hero.jpg">
+  <img fetchpriority="low" alt="دعوة زفاف" src="assets/img/hero.jpg">
   <div class="hint">
     اسحب للأعلى
     <span class="chev"></span>
@@ -378,6 +378,24 @@
     }, reduced ? 50 : 2200);
   }
   seal.addEventListener('click', openInvite);
+
+  // ======= تحميل الصور واحدة تلو الأخرى حسب ترتيب التمرير =======
+  // الترتيب: المظروف ← الختم ← الغلاف ← لوحة الجبس ← الأسماء ← القوس ← البجع
+  const LOAD_ORDER = [
+    'assets/img/envelope.jpg',
+    'assets/img/seal.png',
+    'assets/img/hero.jpg',
+    'assets/img/panel.jpg',
+    'assets/img/names.png',
+    'assets/img/arch.jpg',
+    'assets/img/swans.jpg'
+  ];
+  (function loadNext(i){
+    if(i >= LOAD_ORDER.length) return;
+    const im = new Image();
+    im.onload = im.onerror = ()=>loadNext(i+1);
+    im.src = LOAD_ORDER[i];
+  })(0);
 
   // ======= تمرير تلقائي بطيء بعد فتح الدعوة — يتوقف عند أي تمرير يدوي =======
   const AUTO_SCROLL_SPEED = 40;   // بكسل في الثانية — عدّل هذا الرقم للتحكم بالسرعة
