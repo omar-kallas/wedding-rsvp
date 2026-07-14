@@ -389,11 +389,29 @@
   const veil = document.getElementById('loadVeil');
   const sealCap = document.getElementById('sealCap');
   let openReady = false;
+  let heroReady = false, audioReady = false, audioGate = true;
   function hideVeil(){ veil.classList.add('hide'); }
   function enableOpen(){
     if(openReady) return; openReady = true;
     opener.classList.add('ready');
     sealCap.textContent = 'اضغط على الختم لفتح الدعوة';
+  }
+  function maybeEnable(){ if(heroReady && (audioReady || !audioGate)) enableOpen(); }
+
+  // تحميل الأغنية: يبدأ بعد صورة الغلاف، ويكفي أول جزء منها للفتح
+  function startSongLoad(){
+    let sawProgress = false;
+    const mark = ()=>{ sawProgress = true; };
+    bgm.addEventListener('loadedmetadata', mark);
+    bgm.addEventListener('progress', mark);
+    bgm.addEventListener('canplay', ()=>{ audioReady = true; maybeEnable(); }, {once:true});
+    bgm.addEventListener('error', ()=>{ audioGate = false; maybeEnable(); });
+    bgm.preload = 'auto';
+    bgm.load();
+    // بعض المتصفحات (آيفون) لا تحمّل الصوت قبل اللمس — لا ننتظرها
+    setTimeout(()=>{ if(!sawProgress){ audioGate = false; maybeEnable(); } }, 3000);
+    // صمام أمان: لا تنتظر الأغنية أكثر من ١٢ ثانية
+    setTimeout(()=>{ if(!audioReady){ audioGate = false; maybeEnable(); } }, 12000);
   }
   // صمامات أمان: لا تدع بطء الشبكة يعلّق الصفحة
   setTimeout(hideVeil, 12000);
@@ -428,7 +446,7 @@
     const im = new Image();
     im.onload = im.onerror = ()=>{
       if(i === 1) hideVeil();     // المظروف والختم جاهزان
-      if(i === 2) enableOpen();   // صورة الغلاف جاهزة — يمكن الفتح
+      if(i === 2){ heroReady = true; startSongLoad(); maybeEnable(); }  // صورة الغلاف جاهزة
       loadNext(i+1);
     };
     im.src = LOAD_ORDER[i];
@@ -471,8 +489,6 @@
   bgm.addEventListener('canplaythrough', ()=>{ muteBtn.hidden = false; muteBtn.classList.add('pulse'); }, {once:true});
   bgm.addEventListener('playing', ()=>{ muteBtn.hidden = false; muteBtn.classList.remove('pulse'); }, {once:true});
   bgm.addEventListener('error', ()=>{ muteBtn.hidden = true; }); // song.mp3 not uploaded yet
-  // start fetching the song only after the page itself has loaded
-  window.addEventListener('load', ()=>{ bgm.preload = 'auto'; bgm.load(); });
 
   function fadeIn(){
     bgm.volume = 0;
