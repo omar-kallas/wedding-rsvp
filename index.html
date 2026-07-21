@@ -319,7 +319,7 @@
 <!-- ======= المظروف المغلق (شاشة كاملة) ======= -->
 <div id="loadVeil">
   <div class="veil-ring"></div>
-  <div>جاري تجهيز الدعوة…</div>
+  <div id="veilText">جاري تجهيز الدعوة…</div>
 </div>
 
 <div id="opener">
@@ -429,9 +429,13 @@
     setTimeout(()=>{ if(!audioReady){ audioGate = false; maybeEnable(); } }, 12000);
   }
   // صمامات أمان: لا تدع بطء الشبكة يعلّق الصفحة
-  setTimeout(hideVeil, 12000);
+  // إذا طال التحميل، أخبر الضيف بذلك بدل إظهار صفحة ناقصة
+  setTimeout(()=>{
+    if(!veil.classList.contains('hide')){
+      document.getElementById('veilText').textContent = 'الشبكة بطيئة… ما زلنا نجهّز الدعوة';
+    }
+  }, 15000);
   // صمام أخير: إن تعذّر تحميل صورة الغلاف نهائيًا، حرّر البوابة بعد ٣٠ ثانية بدل إبقاء الزائر عالقًا
-  setTimeout(() => { heroReady = true; maybeEnable(); }, 30000);
 
   let opened = false;
   function openInvite(){
